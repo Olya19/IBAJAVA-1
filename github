@@ -1,0 +1,21 @@
+CopyCallable.isMultipartCopy()
+
+/**
+ * Returns true if this CopyCallable is processing a multi-part copy.
+ *
+ * @return True if this CopyCallable is processing a multi-part copy.
+ */
+public boolean isMultipartCopy() {
+  Region sourceRegion = copyObjectRequest.getSourceBucketRegion();
+  Region destRegion = cos.getClientConfig().getRegion();
+  // 如果没有设置source region, 表示使用的和clientconfig里面同一region, 这里不适用分块copy，使用put object copy即可
+  if (sourceRegion == null) {
+    return false;
+  } else {
+    // 如果设置了source region, 且和目的region相同, 则也是用put object copy.
+    if (sourceRegion.equals(destRegion)) {
+      return false;
+    }
+  }
+  return (metadata.getContentLength() > configuration.getMultipartCopyThreshold());
+}
